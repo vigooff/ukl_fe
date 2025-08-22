@@ -1,102 +1,77 @@
-import Image from "next/image";
+
+"use client";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+interface Playlist {
+  uuid: string;
+  playlist_name: string;
+  song_count: number;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      try {
+        const response = await axios.get("https://learn.smktelkom-mlg.sch.id/ukl2/playlists");
+        if (response.data.success) {
+          setPlaylists(response.data.data);
+        } else {
+          setError(response.data.message);
+        }
+      } catch (err) {
+        setError("Gagal memuat playlist");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlaylists();
+  }, []);
+
+  return (
+    <div className="bg-black text-white font-sans h-screen flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Playlist */}
+        <aside className="w-64 bg-black p-4 overflow-y-auto border-r border-gray-800">
+          <h2 className="text-xl font-bold mb-6">Your Library</h2>
+          {loading ? (
+            <div className="text-gray-400">Loading...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <div className="space-y-2">
+              {playlists.map((playlist) => (
+                <div
+                  key={playlist.uuid}
+                  className="p-2 rounded-md cursor-pointer hover:bg-gray-800"
+                  onClick={() => window.location.href = `/playlist?playlist_id=${playlist.uuid}`}
+                >
+                  <h3 className="font-medium">{playlist.playlist_name}</h3>
+                  <p className="text-sm text-gray-400">{playlist.song_count} songs</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-10 flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black">
+          <h1 className="text-4xl font-bold mb-4">Welcome to Your Music</h1>
+          <p className="text-lg text-gray-300 mb-8 text-center max-w-xl">
+            Temukan dan dengarkan lagu favoritmu, kelola playlist, dan nikmati pengalaman seperti Spotify dengan tampilan modern dan konsisten.
+          </p>
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-gray-400">Pilih playlist di samping untuk mulai mendengarkan!</span>
+          </div>
+        </main>
+      </div>
+      {/* Footer/Player Placeholder */}
+      <footer className="h-20 bg-gray-900 border-t border-gray-800 flex items-center justify-center text-gray-500">
+        <span>© {new Date().getFullYear()} Your Music App</span>
       </footer>
     </div>
   );
