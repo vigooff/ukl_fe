@@ -1,8 +1,12 @@
 "use client";
 
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+const SongDetailContent = dynamic(() => import('../detail/SongDetailContent'), { ssr: false });
 
 interface Song {
   uuid: string;
@@ -61,6 +65,7 @@ const PlaylistPage: React.FC = () => {
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(playlistId);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [searchInput, setSearchInput] = useState<string>(searchQuery);
@@ -157,51 +162,87 @@ const PlaylistPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-black text-white font-sans h-screen flex flex-col">
-      {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar - Playlists */}
-        <div className="w-64 bg-black p-4 overflow-y-auto border-r border-gray-800">
-          <h2 className="text-xl font-bold mb-6">Your Library</h2>
-          <div className="space-y-2">
+    <>
+      <div className="bg-[#181A20] text-[#F3F4F6] font-sans min-h-screen flex flex-col">
+        <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar Playlist */}
+        <aside className="w-64 bg-[#1F222A] p-6 overflow-y-auto border-r border-[#23262F] flex flex-col">
+          {/* Navigasi Home */}
+          <div className="flex flex-col gap-6 mb-8">
+            <button
+              onClick={() => window.location.href = '/'}
+              className="flex items-center gap-2 text-[#A1A1AA] hover:text-[#7EE787] transition-colors text-lg font-bold mb-2"
+              title="Kembali ke Home"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12L12 4l9 8M4.5 10.5V19a2.5 2.5 0 002.5 2.5h2A2.5 2.5 0 0011.5 19V15a2.5 2.5 0 012.5-2.5h0A2.5 2.5 0 0116.5 15v4a2.5 2.5 0 002.5 2.5h2A2.5 2.5 0 0021 19v-8.5" />
+              </svg>
+              <span className="hidden md:inline">Home</span>
+            </button>
+            <h2 className="text-2xl font-bold tracking-tight text-[#F3F4F6]">Playlist</h2>
+          </div>
+          <div className="space-y-3">
             {playlists.map((playlist) => (
-              <div
+              <motion.div
                 key={playlist.uuid}
-                className={`p-2 rounded-md cursor-pointer hover:bg-gray-800 ${selectedPlaylist === playlist.uuid ? 'bg-gray-800' : ''}`}
+                whileHover={{ scale: 1.04, backgroundColor: "#23262F" }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className={`p-3 rounded-lg cursor-pointer flex flex-col gap-1 group ${selectedPlaylist === playlist.uuid ? 'bg-[#23262F]' : ''}`}
                 onClick={() => handlePlaylistClick(playlist.uuid)}
               >
-                <h3 className="font-medium">{playlist.playlist_name}</h3>
-                <p className="text-sm text-gray-400">{playlist.song_count} songs</p>
-              </div>
+                <span className="font-semibold text-[#F3F4F6] group-hover:text-[#7EE787] transition-colors duration-200">{playlist.playlist_name}</span>
+                <span className="text-xs text-[#A1A1AA]">{playlist.song_count} lagu</span>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </aside>
 
         {/* Middle Content - Songs */}
-        <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-gray-900 to-black">
+        <main className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-[#23262F] to-[#181A20]">
           {loading ? (
             <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#7EE787]"></div>
             </div>
           ) : error ? (
-            <div className="text-red-500 text-center">{error}</div>
+            <div className="text-red-400 text-center">{error}</div>
           ) : (
             <>
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">
+              {/* Navigasi Back/Forward */}
+              <div className="flex items-center gap-2 mb-6">
+                <button
+                  onClick={() => router.back()}
+                  className="p-2 rounded-full bg-[#23262F] hover:bg-[#7EE787] hover:text-[#181A20] transition-colors"
+                  title="Kembali"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => router.forward && router.forward()}
+                  className="p-2 rounded-full bg-[#23262F] hover:bg-[#7EE787] hover:text-[#181A20] transition-colors"
+                  title="Maju"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                <h1 className="text-3xl font-bold tracking-tight text-[#F3F4F6]">
                   {playlists.find(p => p.uuid === selectedPlaylist)?.playlist_name || 'Playlist'}
                 </h1>
-                <form onSubmit={handleSearch} className="flex">
+                <form onSubmit={handleSearch} className="flex w-full sm:w-auto">
                   <input
                     type="text"
-                    placeholder="Search songs..."
+                    placeholder="Cari lagu..."
                     value={tempSearchInput}
                     onChange={(e) => setTempSearchInput(e.target.value)}
-                    className="bg-gray-800 text-white px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500 w-64"
+                    className="bg-[#23262F] text-[#F3F4F6] px-4 py-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#7EE787] w-full sm:w-64 border border-[#23262F]"
                   />
                   <button
                     type="submit"
-                    className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-r-md flex items-center justify-center"
+                    className="bg-[#7EE787] hover:bg-[#A5D6FF] px-4 py-2 rounded-r-md flex items-center justify-center text-[#181A20] font-semibold transition-colors duration-200"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
@@ -209,162 +250,125 @@ const PlaylistPage: React.FC = () => {
                   </button>
                 </form>
               </div>
-              
               <div className="mb-8">
-                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-gray-400 border-b border-gray-800">
+                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[#A1A1AA] border-b border-[#23262F] text-xs uppercase tracking-wider">
                   <div className="col-span-1">#</div>
-                  <div className="col-span-5">TITLE</div>
-                  <div className="col-span-4">ARTIST</div>
-                  <div className="col-span-2 text-right">LIKES</div>
+                  <div className="col-span-5">Judul</div>
+                  <div className="col-span-4">Artis</div>
+                  <div className="col-span-2 text-right">Likes</div>
                 </div>
-                
-                {filteredSongs.length > 0 ? (
-                  filteredSongs.map((song, index) => (
-                    <div 
-                      key={song.uuid}
-                      className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-md hover:bg-gray-800 ${currentSong?.uuid === song.uuid ? 'bg-gray-800' : ''}`}
-                      onClick={() => router.push(`/detail?song_id=${song.uuid}`)}
-                    >
-                      <div className="col-span-1 text-gray-400">{index + 1}</div>
-                      <div className="col-span-5 font-medium flex items-center">
-                        <img 
-                          src={getThumbnailUrl(song.thumbnail)} 
-                          alt={`${song.title} thumbnail`} 
-                          className="w-10 h-10 rounded-md mr-3 object-cover"
-                          onError={handleImageError}
-                          loading="lazy"
-                        />
-                        {song.title}
-                      </div>
-                      <div className="col-span-4 text-gray-400">{song.artist}</div>
-                      <div className="col-span-2 text-right text-gray-400">
-                        {song.likes.toLocaleString()}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10 text-gray-400">
-                    No songs found {searchInput ? `for "${searchInput}"` : ''}
-                  </div>
-                )}
+                <AnimatePresence>
+                  {filteredSongs.length > 0 ? (
+                    filteredSongs.map((song, index) => (
+                      <motion.div
+                        key={song.uuid}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.04 }}
+                        className={`grid grid-cols-12 gap-4 px-4 py-3 rounded-lg cursor-pointer items-center hover:bg-[#23262F] transition-colors duration-200 ${currentSong?.uuid === song.uuid ? 'bg-[#23262F]' : ''}`}
+                        onClick={() => setSelectedSong(song)}
+                        whileHover={{ scale: 1.01 }}
+                      >
+                        <div className="col-span-1 text-[#A1A1AA] font-mono">{index + 1}</div>
+                        <div className="col-span-5 font-medium flex items-center gap-3">
+                          <motion.img
+                            src={getThumbnailUrl(song.thumbnail)}
+                            alt={`${song.title} thumbnail`}
+                            className="w-10 h-10 rounded-md object-cover shadow-md border border-[#23262F]"
+                            onError={handleImageError}
+                            loading="lazy"
+                            whileHover={{ scale: 1.08 }}
+                          />
+                          <span className="truncate">{song.title}</span>
+                        </div>
+                        <div className="col-span-4 text-[#A1A1AA] truncate">{song.artist}</div>
+                        <div className="col-span-2 text-right text-[#A1A1AA]">{song.likes.toLocaleString()}</div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <motion.div className="text-center py-10 text-[#A1A1AA]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      Tidak ada lagu ditemukan {searchInput ? `untuk "${searchInput}"` : ''}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </>
           )}
-        </div>
+        </main>
 
         {/* Right Sidebar - Song Details */}
-        <div className="w-72 p-6 overflow-y-auto bg-gradient-to-b from-gray-900 to-black border-l border-gray-800">
-          {currentSong ? (
-            <div className="flex flex-col">
-              <div className="w-full h-64 bg-gray-700 rounded-md mb-6 overflow-hidden">
-                <img 
-                  src={getThumbnailUrl(currentSong.thumbnail)} 
-                  alt={`${currentSong.title} thumbnail`} 
-                  className="w-full h-full object-cover"
-                  onError={handleImageError}
-                  loading="lazy"
-                />
-              </div>
-              <h2 className="text-xl font-bold mb-2">{currentSong.title}</h2>
-              <p className="text-gray-400 mb-4">{currentSong.artist}</p>
-              <p className="text-sm text-gray-300 mb-6">{currentSong.description}</p>
-              
-              <div className="mb-6">
-                <h3 className="font-bold mb-2">Likes</h3>
-                <p className="text-gray-400">{currentSong.likes.toLocaleString()}</p>
-              </div>
-              
-              <div>
-                <h3 className="font-bold mb-2">Comments</h3>
-                {currentSong.comments.length > 0 ? (
-                  <div className="space-y-3">
-                    {currentSong.comments.map((comment, index) => (
-                      <div key={index} className="bg-gray-800 p-3 rounded-md">
-                        <div className="flex justify-between items-start mb-1">
-                          <span className="font-medium text-sm">{comment.creator}</span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(comment.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-300">{comment.comment_text}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-400 text-sm">No comments yet</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="text-gray-400 text-center mt-10">
-              Select a song to view details
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Player Controls */}
-      <div className="h-20 bg-gray-900 border-t border-gray-800 flex items-center px-4">
-        {currentSong && (
-          <>
-            <div className="w-1/4 flex items-center">
-              <div className="w-12 h-12 bg-gray-700 rounded-md mr-3 overflow-hidden">
-                <img 
-                  src={getThumbnailUrl(currentSong.thumbnail)} 
-                  alt={`${currentSong.title} thumbnail`} 
-                  className="w-full h-full object-cover"
-                  onError={handleImageError}
-                  loading="lazy"
-                />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm">{currentSong.title}</h4>
-                <p className="text-gray-400 text-xs">{currentSong.artist}</p>
-              </div>
-            </div>
-            
-            <div className="w-2/4 flex flex-col items-center">
-              <div className="flex items-center space-x-4 mb-2">
-                <button className="text-gray-400 hover:text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
-                  </svg>
-                </button>
-                <button className="bg-white rounded-full p-2 hover:scale-105 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button className="text-gray-400 hover:text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798L4.555 5.168z" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="w-full flex items-center space-x-2">
-                <span className="text-xs text-gray-400">0:00</span>
-                <div className="flex-1 h-1 bg-gray-700 rounded-full">
-                  <div className="h-1 bg-gray-400 rounded-full w-1/4"></div>
+        <aside className="w-80 p-8 overflow-y-auto bg-gradient-to-b from-[#23262F] to-[#181A20] border-l border-[#23262F] hidden md:block">
+          <AnimatePresence>
+            {currentSong ? (
+              <motion.div
+                key={currentSong.uuid}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 40 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col"
+              >
+                <div className="w-full h-64 bg-[#23262F] rounded-lg mb-6 overflow-hidden flex items-center justify-center">
+                  <img
+                    src={getThumbnailUrl(currentSong.thumbnail)}
+                    alt={`${currentSong.title} thumbnail`}
+                    className="w-full h-full object-cover"
+                    onError={handleImageError}
+                    loading="lazy"
+                  />
                 </div>
-                <span className="text-xs text-gray-400">3:30</span>
-              </div>
-            </div>
-            
-            <div className="w-1/4 flex justify-end items-center space-x-3">
-              <button className="text-gray-400 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828a1 1 0 010-1.415z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <div className="w-24 h-1 bg-gray-700 rounded-full">
-                <div className="h-1 bg-gray-400 rounded-full w-3/4"></div>
-              </div>
-            </div>
-          </>
-        )}
+                <h2 className="text-2xl font-bold mb-2 text-[#F3F4F6]">{currentSong.title}</h2>
+                <p className="text-[#A1A1AA] mb-4">{currentSong.artist}</p>
+                <p className="text-sm text-[#F3F4F6] mb-6">{currentSong.description}</p>
+                <div className="mb-6">
+                  <h3 className="font-bold mb-2 text-[#7EE787]">Likes</h3>
+                  <p className="text-[#A1A1AA]">{currentSong.likes.toLocaleString()}</p>
+                </div>
+                <div>
+                  <h3 className="font-bold mb-2 text-[#7EE787]">Comments</h3>
+                  {currentSong.comments.length > 0 ? (
+                    <div className="space-y-3">
+                      {currentSong.comments.map((comment, index) => (
+                        <div key={index} className="bg-[#23262F] p-3 rounded-lg">
+                          <div className="flex justify-between items-start mb-1">
+                            <span className="font-medium text-sm text-[#F3F4F6]">{comment.creator}</span>
+                            <span className="text-xs text-[#A1A1AA]">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-[#F3F4F6]">{comment.comment_text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[#A1A1AA] text-sm">Belum ada komentar</p>
+                  )}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div className="text-[#A1A1AA] text-center mt-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                Pilih lagu untuk melihat detail
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </aside>
+        </div>
+        {/* Player Controls */}
+        <footer className="h-16 bg-[#1F222A] border-t border-[#23262F] flex items-center justify-center text-[#A1A1AA] text-sm tracking-wide">
+          <span>© {new Date().getFullYear()} Your Music App</span>
+        </footer>
       </div>
-    </div>
+      {/* Overlay detail lagu */}
+      <AnimatePresence>
+        {selectedSong && (
+          <SongDetailContent
+            song={selectedSong}
+            onClose={() => setSelectedSong(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

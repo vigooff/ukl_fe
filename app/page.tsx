@@ -1,7 +1,10 @@
 
 "use client";
+
+"use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Playlist {
   uuid: string;
@@ -33,44 +36,77 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-black text-white font-sans h-screen flex flex-col">
+    <div className="bg-[#181A20] text-[#F3F4F6] font-sans min-h-screen flex flex-col">
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar Playlist */}
-        <aside className="w-64 bg-black p-4 overflow-y-auto border-r border-gray-800">
-          <h2 className="text-xl font-bold mb-6">Your Library</h2>
+        <aside className="w-64 bg-[#1F222A] p-6 overflow-y-auto border-r border-[#23262F] flex flex-col">
+          <h2 className="text-2xl font-bold mb-8 tracking-tight text-[#F3F4F6]">Playlist</h2>
           {loading ? (
-            <div className="text-gray-400">Loading...</div>
+            <div className="text-[#A1A1AA] animate-pulse">Loading...</div>
           ) : error ? (
-            <div className="text-red-500">{error}</div>
+            <div className="text-red-400">{error}</div>
           ) : (
-            <div className="space-y-2">
-              {playlists.map((playlist) => (
-                <div
+            <div className="space-y-3">
+              {playlists.map((playlist, i) => (
+                <motion.div
                   key={playlist.uuid}
-                  className="p-2 rounded-md cursor-pointer hover:bg-gray-800"
-                  onClick={() => window.location.href = `/playlist?playlist_id=${playlist.uuid}`}
+                  whileHover={{ scale: 1.04, backgroundColor: "#23262F" }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className="p-3 rounded-lg cursor-pointer flex flex-col gap-1 group"
+                  onClick={() => {
+                    // Animasi keluar sebelum pindah page
+                    window.location.href = `/playlist?playlist_id=${playlist.uuid}`;
+                  }}
                 >
-                  <h3 className="font-medium">{playlist.playlist_name}</h3>
-                  <p className="text-sm text-gray-400">{playlist.song_count} songs</p>
-                </div>
+                  <span className="font-semibold text-[#F3F4F6] group-hover:text-[#7EE787] transition-colors duration-200">{playlist.playlist_name}</span>
+                  <span className="text-xs text-[#A1A1AA]">{playlist.song_count} lagu</span>
+                </motion.div>
               ))}
             </div>
           )}
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-10 flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black">
-          <h1 className="text-4xl font-bold mb-4">Welcome to Your Music</h1>
-          <p className="text-lg text-gray-300 mb-8 text-center max-w-xl">
-            Temukan dan dengarkan lagu favoritmu, kelola playlist, dan nikmati pengalaman seperti Spotify dengan tampilan modern dan konsisten.
-          </p>
-          <div className="flex flex-col items-center gap-4">
-            <span className="text-gray-400">Pilih playlist di samping untuk mulai mendengarkan!</span>
-          </div>
+        <main className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
+          <AnimatePresence>
+            <motion.div
+              key="main-content"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="w-full flex flex-col items-center justify-center px-4"
+            >
+              <motion.h1
+                className="text-5xl font-extrabold mb-4 tracking-tight text-center bg-gradient-to-r from-[#7EE787] via-[#A5D6FF] to-[#7EE787] bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.7 }}
+              >
+                Temukan Musik Favoritmu
+              </motion.h1>
+              <motion.p
+                className="text-lg text-[#A1A1AA] mb-10 text-center max-w-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.7 }}
+              >
+                Dengarkan lagu, kelola playlist, dan nikmati pengalaman musik minimalis, modern, dan elegan.
+              </motion.p>
+              <motion.div
+                className="flex flex-col items-center gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.7 }}
+              >
+                <span className="text-[#7EE787] text-base font-medium animate-pulse">Pilih playlist di samping untuk mulai mendengarkan!</span>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
       {/* Footer/Player Placeholder */}
-      <footer className="h-20 bg-gray-900 border-t border-gray-800 flex items-center justify-center text-gray-500">
+      <footer className="h-16 bg-[#1F222A] border-t border-[#23262F] flex items-center justify-center text-[#A1A1AA] text-sm tracking-wide">
         <span>© {new Date().getFullYear()} Your Music App</span>
       </footer>
     </div>
