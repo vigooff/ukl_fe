@@ -19,11 +19,13 @@ interface Song {
 
 export const dynamic = "force-dynamic";
 
-// ✅ langsung typing di function params
+// ✅ Definisi props sesuai typing Next.js app router
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: { slug: string[] };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const slug = params.slug?.[0];
   if (!slug) return notFound();
