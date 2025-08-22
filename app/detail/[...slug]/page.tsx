@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import axios from "axios";
-import SongDetailContent from "../SongDetailContent";
+import SongDetailClient from "../SongDetailClient";
 
 interface Song {
   uuid: string;
@@ -51,6 +51,6 @@ export default async function Page({
     );
   }
 
-  // ✅ kirim song ke SongDetailContent
-  return <SongDetailContent song={song} />;
+    // ✅ kirim song ke SongDetailClient
+    return <SongDetailClient slug={params.slug} />;
 }
