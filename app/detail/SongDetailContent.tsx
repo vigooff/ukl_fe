@@ -45,6 +45,16 @@ export default function SongDetailContent({ song, onClose }: Props) {
       </div>
     );
 
+  // Helper to extract YouTube video ID from a URL
+  function getYouTubeVideoId(url: string): string | null {
+    const regExp = /(?:youtube[.-]com\/(?:.*v=|v\/|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+  }
+
+  const youtubeId = getYouTubeVideoId(song.source);
+  const youtubeUrl = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
+
   return (
     <Wrapper>
       <motion.div
@@ -65,11 +75,27 @@ export default function SongDetailContent({ song, onClose }: Props) {
         )}
 
         <div className="flex flex-col md:flex-row gap-6 items-center">
-          <img
-            src={song.thumbnail}
-            alt={song.title}
-            className="w-48 h-48 object-cover rounded-lg shadow-md border border-[#23262F]"
-          />
+          {youtubeUrl ? (
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open YouTube video in new tab"
+              className="group"
+            >
+              <img
+                src={song.thumbnail}
+                alt={song.title}
+                className="w-48 h-48 object-cover rounded-lg shadow-md border border-[#23262F] transition-transform group-hover:scale-105 cursor-pointer"
+              />
+            </a>
+          ) : (
+            <img
+              src={song.thumbnail}
+              alt={song.title}
+              className="w-48 h-48 object-cover rounded-lg shadow-md border border-[#23262F]"
+            />
+          )}
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold mb-2 text-[#F3F4F6]">
               {song.title}

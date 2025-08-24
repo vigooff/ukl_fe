@@ -65,6 +65,8 @@ export default function PlaylistClient() {
   const searchQuery = searchParams.get("search") || "";
 
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  // Responsive sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [songs, setSongs] = useState<Song[]>([]);
   const [filteredSongs, setFilteredSongs] = useState<Song[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(playlistId);
@@ -137,6 +139,7 @@ export default function PlaylistClient() {
     setSearchInput("");
     setTempSearchInput("");
     router.push(`/playlist?playlist_id=${playlistId}`);
+    if (window.innerWidth < 768) setSidebarOpen(false); // auto-hide on mobile
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -163,10 +166,42 @@ export default function PlaylistClient() {
 
   return (
     <>
+      {/* Mobile sidebar toggle button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-30 bg-[#23262F] text-[#7EE787] p-2 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-[#7EE787]"
+        aria-label={sidebarOpen ? 'Tutup Playlist' : 'Buka Playlist'}
+        onClick={() => setSidebarOpen((v) => !v)}
+      >
+        {sidebarOpen ? (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6h16.5M3.75 18h16.5" />
+          </svg>
+        )}
+      </button>
       <div className="bg-[#181A20] text-[#F3F4F6] font-sans min-h-screen flex flex-col">
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
           {/* Sidebar Playlist */}
-          <aside className="w-64 bg-[#1F222A] p-6 overflow-y-auto border-r border-[#23262F] flex flex-col">
+          <aside
+            className={`
+              bg-[#1F222A] border-b md:border-b-0 md:border-r border-[#23262F] z-20
+              flex flex-col gap-6 md:gap-0 sticky top-0
+              w-64 md:w-64 p-4 md:p-6 overflow-y-auto
+              transition-transform duration-300 ease-in-out
+              fixed md:static h-full md:h-auto left-0 top-0
+              ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              md:translate-x-0
+              md:w-64
+              md:relative
+              md:flex
+              shadow-lg md:shadow-none
+            `}
+            style={{ maxWidth: '100vw' }}
+          >
             <div className="flex flex-col gap-6 mb-8">
               <button
                 onClick={() => (window.location.href = "/")}
@@ -200,8 +235,17 @@ export default function PlaylistClient() {
             </div>
           </aside>
 
+          {/* Overlay for mobile when sidebar is open */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/40 z-10 md:hidden"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Tutup Playlist"
+            />
+          )}
+
           {/* Main Content */}
-          <main className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-[#23262F] to-[#181A20]">
+          <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-gradient-to-b from-[#23262F] to-[#181A20]">
             {loading ? (
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#7EE787]" />
