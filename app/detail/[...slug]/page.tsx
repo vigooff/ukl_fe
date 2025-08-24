@@ -2,7 +2,13 @@ import SongDetailClient from "../SongDetailClient";
 
 export const dynamic = "force-dynamic";
 
-export default function Page({ params }: { params: { slug: string[] } }) {
-  return <SongDetailClient slug={params.slug} />;
+interface PageProps {
+  params: {
+    slug?: string[];
+  };
 }
 
+export default function Page({ params }: PageProps) {
+  const slug = params?.slug ?? []; // fallback kalau slug undefined
+  return <SongDetailClient slug={slug} />;
+}
