@@ -2,12 +2,6 @@ import SongDetailClient from "../SongDetailClient";
 
 export const dynamic = "force-dynamic";
 
-interface PageProps {
-  params: {
-    slug: string[];
-  };
-}
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: { params: { slug: string[] } }) {
   return <SongDetailClient slug={params.slug} />;
 }
